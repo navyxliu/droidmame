@@ -2346,13 +2346,13 @@ int showgamewarnings(struct osd_bitmap *bitmap)
 
 	/* clear the input memory */
 	while (code_read_async() != CODE_NONE) {};
-
-	while (displaygameinfo(bitmap,0) == 1)
-	{
-		update_video_and_audio();
-		osd_poll_joysticks();
-	}
-
+//xliu: wipe gameinfo 
+//	while (displaygameinfo(bitmap,0) == 1)
+//	{
+//		update_video_and_audio();
+//		osd_poll_joysticks();
+//	}
+//
 	#ifdef MESS
 	while (displayimageinfo(bitmap,0) == 1)
 	{

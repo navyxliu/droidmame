@@ -21,10 +21,9 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #include <android/log.h>
-
-#include <pthread.h>
 
 //TODO
 int  global_fps = 1;
@@ -39,7 +38,7 @@ int m4all_HiSpecs = 1;
 
 int m4all_hide_LR = 0;
 int m4all_BplusX = 0;
-int m4all_landscape_buttons = 2;
+int m4all_landscape_buttons = 4;
 extern int m4all_inGame;
 extern int m4all_exitGame;
 extern int m4all_exitPause;
@@ -71,7 +70,7 @@ unsigned short 			*gp2x_screen15;
 unsigned short 			*gp2x_logvram15[2];
 unsigned long 			gp2x_physvram[2];
 unsigned int			gp2x_nflip;
-unsigned short 	gp2x_palette[512];
+unsigned short 			gp2x_palette[512];
 int				gp2x_sound_rate=44100;
 int				gp2x_sound_stereo=0;
 int 				gp2x_pal_50hz=0;
@@ -185,6 +184,7 @@ int getMyValue(int key){
 	    case 2:
 	         return m4all_exitGame;
 	    case 3:
+	__android_log_print(ANDROID_LOG_DEBUG, "libMAME4all.so", "m4all_landscape_buttons  %d",m4all_landscape_buttons);
 	    	 return m4all_landscape_buttons;
 	    case 4:
 	    	 return m4all_hide_LR;
@@ -562,36 +562,35 @@ void* threaded_sound_play(void* args);
 
 void gp2x_init(int ticks_per_second, int bpp, int rate, int bits, int stereo, int Hz)
 {
-	static pthread_t main_tid;
+    static pthread_t main_tid;
 
     if (!lib_inited )
     {
+	gp2x_ticks_per_second=1000;
 
-       gp2x_ticks_per_second=1000;
+	//gp2x_screen15=screenbuffer;
+	//gp2x_screen8=(unsigned char *)screenbuffer;
 
-	   //gp2x_screen15=screenbuffer;
-	   //gp2x_screen8=(unsigned char *)screenbuffer;
+	gp2x_screen15=screenbuffer;
+	gp2x_screen8=(unsigned char *)screenbuffer;
+	initVideo_callback((void *)&screenbuffer);
 
-	   gp2x_screen15=screenbuffer;
-	   gp2x_screen8=(unsigned char *)screenbuffer;
-       initVideo_callback((void *)&screenbuffer);
+	gp2x_nflip=0;
 
-	   gp2x_nflip=0;
+	gp2x_set_video_mode(bpp,320,240);
 
-	   gp2x_set_video_mode(bpp,320,240);
+	gp2x_video_color8(0,0,0,0);
+	gp2x_video_color8(255,255,255,255);
+	gp2x_video_setpalette();
 
-	   gp2x_video_color8(0,0,0,0);
-	   gp2x_video_color8(255,255,255,255);
-	   gp2x_video_setpalette();
+	/* atexit(gp2x_deinit); */
+	//app_DemuteSound();
 
-	   /* atexit(gp2x_deinit); */
-	   //app_DemuteSound();
+	//int i = pthread_create(&main_tid, NULL, threaded_sound_play, NULL);
+	//if(i!=0)__android_log_print(ANDROID_LOG_ERROR, "mame4all-jni", "Error setting creating pthread %d",i);
 
-	   //int i = pthread_create(&main_tid, NULL, threaded_sound_play, NULL);
-	   //if(i!=0)__android_log_print(ANDROID_LOG_ERROR, "mame4all-jni", "Error setting creating pthread %d",i);
-
-	   pthread_mutex_init (&mut,NULL);
-   	   lib_inited = 1;
+	pthread_mutex_init (&mut,NULL);
+	lib_inited = 1;
     }
 }
 
@@ -635,52 +634,50 @@ inline int emptyQueue(){
 
 void queue(unsigned char *p,unsigned size){
         unsigned newhead;
-		if(head + size < TAM)
-		{
-			memcpy(ptr_buf+head,p,size);
-			newhead = head + size;
-		}
-		else
-		{
-			memcpy(ptr_buf+head,p, TAM -head);
-			memcpy(ptr_buf,p + (TAM-head), size - (TAM-head));
-			newhead = (head + size) - TAM;
-		}
-		pthread_mutex_lock(&mut);
-
-		head = newhead;
-
-		pthread_mutex_unlock(&mut);
+	if(head + size < TAM)
+	{
+		memcpy(ptr_buf+head,p,size);
+		newhead = head + size;
+	}
+	else
+	{
+		memcpy(ptr_buf+head,p, TAM -head);
+		memcpy(ptr_buf,p + (TAM-head), size - (TAM-head));
+		newhead = (head + size) - TAM;
+	}
+	pthread_mutex_lock(&mut);
+	head = newhead;
+	pthread_mutex_unlock(&mut);
 }
 
 unsigned short dequeue(unsigned char *p,unsigned size){
 
-    	unsigned real;
+	unsigned real;
 
-		if(emptyQueue())
-		{
-	    	memset(p,0,size);//TODO ver si quito para que no petardee
-			return size;
-		}
+	if(emptyQueue())
+	{
+		memset(p,0,size);//TODO ver si quito para que no petardee
+		return size;
+	}
 
-		pthread_mutex_lock(&mut);
+	pthread_mutex_lock(&mut);
 
-		unsigned datasize = head > tail ? head - tail : (TAM - tail) + head ;
-		real = datasize > size ? size : datasize;
+	unsigned datasize = head > tail ? head - tail : (TAM - tail) + head ;
+	real = datasize > size ? size : datasize;
 
-		if(tail + real < TAM)
-		{
-			memcpy(p,ptr_buf+tail,real);
-			tail+=real;
-		}
-		else
-		{
-			memcpy(p,ptr_buf + tail, TAM - tail);
-			memcpy(p+ (TAM-tail),ptr_buf , real - (TAM-tail));
-			tail = (tail + real) - TAM;
-		}
+	if(tail + real < TAM)
+	{
+		memcpy(p,ptr_buf+tail,real);
+		tail+=real;
+	}
+	else
+	{
+		memcpy(p,ptr_buf + tail, TAM - tail);
+		memcpy(p+ (TAM-tail),ptr_buf , real - (TAM-tail));
+		tail = (tail + real) - TAM;
+	}
 
-		pthread_mutex_unlock(&mut);
+	pthread_mutex_unlock(&mut);
 
         return real;
 }
@@ -728,8 +725,3 @@ void* threaded_sound_play(void* args)
 }
 
 ///END QUEUE
-
-
-
-
-

@@ -28,7 +28,7 @@ int m4all_sound = 4;
 int m4all_clock_cpu= 80;
 int m4all_clock_sound=80;
 int m4all_cheat=0;
-int m4all_buttons=2;
+int m4all_buttons=4;
 int m4all_waysStick = 8;
 int m4all_ASMCores = 1;
 int m4all_cpu_cores = 0;
@@ -186,12 +186,6 @@ static void game_list_view(int *pos) {
 	{
 		gp2x_gamelist_text_out(35, 110, "NO AVAILABLE ROMS FOUND");
 	}
-#ifdef ARMV7
-	gp2x_gamelist_text_out( (8*6)-8, (29*8)-6,"MAME4droid. v1.5 by D.Valdeita");
-#else
-	gp2x_gamelist_text_out( (8*6)-8, (29*8)-6,"MAME4droid  v1.5 by D.Valdeita");
-#endif
-
 }
 
 static void game_list_select (int index, char *game, char *emu) {
@@ -346,8 +340,8 @@ static int show_options(char *game)
 		/* (8) Landscape Num Buttons */
 		switch (m4all_buttons)
 		{
-		    case 0: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   0 Button"); break;
-		    case 1: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   1 Button"); break;
+			case 0: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   0 Button"); break;
+			case 1: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   1 Button"); break;
 			case 2: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   2 Buttons"); break;
 			case 3: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   3 Buttons (A=B+X)"); break;
 			case 4: gp2x_gamelist_text_out(x_Pos,y_Pos+100, "Num Buttons   3 Buttons"); break;
@@ -622,14 +616,14 @@ static void select_game(char *emu, char *game)
 			{
 				m4all_clock_cpu= 100;
 				m4all_clock_sound= 100;
-				m4all_buttons=2;
+				m4all_buttons=4;
 				m4all_sound=12;
 			}
 			else
 			{
 				m4all_clock_cpu= 80;
 				m4all_clock_sound= 80;
-				m4all_buttons=2;
+				m4all_buttons=4;
 			}
 
 			if(show_options(game))
@@ -820,23 +814,19 @@ void execute_game (char *playemu, char *playgame)
 	m4all_inGame = 1;
 	m4all_exitGame=0;
 	m4all_hide_LR = m4all_buttons!=6;
-	m4all_BplusX = m4all_buttons==3;
-	m4all_landscape_buttons = m4all_buttons <= 3 ? m4all_buttons : (m4all_buttons - 1) ;
+	m4all_BplusX = (m4all_buttons == 3);
+	//xliu: keep 4 keys 
+	m4all_landscape_buttons = m4all_buttons;
 	//gp2x_set_video_mode(16,320,240);
 
 	my_android_main(n, args);
-
-	if(m4all_HiSpecs)
-		m4all_buttons=2;
-	else
-		m4all_buttons=2;
 
 	m4all_hide_LR = 0;
 	m4all_BplusX = 0;
 
 	m4all_exitGame=0;
 	m4all_inGame = 0;
-	m4all_landscape_buttons = 2;
+	m4all_landscape_buttons = 4;
 	emulated_width = 320;
 	emulated_height = 240;
 	gp2x_set_video_mode(16,320,240);
@@ -848,15 +838,11 @@ extern "C" int android_main  (int argc, char **argv)
 {
 	FILE *f;
 
-	__android_log_print(ANDROID_LOG_DEBUG, "libMAME4all.so", "init iOS frontend");
-	//printf("init iOS frontend\n");
 /*
 	mkdir(get_documents_path("iOS"), 0755);
 	mkdir(get_documents_path("cfg"), 0755);
 	mkdir(get_documents_path("hi"), 0755);
 */
-	__android_log_print(ANDROID_LOG_DEBUG, "libMAME4all.so", "creados directorios");
-
 	/* GP2X Initialization */
 	gp2x_init(1000,8,22050,16,0,60);
 
@@ -868,7 +854,7 @@ extern "C" int android_main  (int argc, char **argv)
 	{
 		m4all_clock_cpu= 100;
 		m4all_clock_sound= 100;
-		m4all_buttons=2;
+		m4all_buttons=4;
 		m4all_sound=12;
 	}
 
@@ -920,6 +906,7 @@ extern "C" int android_main  (int argc, char **argv)
 #else
         strcpy(playemu, "mame");
         strcpy(playgame, "sf2");
+        //show_options("sf2");
 #endif
 	execute_game(playemu, playgame);
 

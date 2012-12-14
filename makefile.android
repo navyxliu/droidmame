@@ -4,7 +4,7 @@ BASE_DEV=$(ANDROID_NDK)/platforms/android-14/arch-arm
 PREFIX=$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
          
 TARGET = mame
-TARGET_LIBNAME := libdroidMAME
+TARGET_LIBNAME := libdroidMAME.so
 # set this the operating system you're building for
 # (actually you'll probably need your own main makefile anyways)
 # MAMEOS = msdos

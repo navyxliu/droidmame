@@ -85,12 +85,12 @@ int fuzzycmp (const char *s, const char *l)
 //extern "C"
 int my_android_main (int argc, char **argv)
 {
-    int res, i, j = 0, game_index;
-    char *playbackname = NULL;
-    int use_cyclone=0;
-    int use_drz80=0;
-    int use_drz80_sound=0;
-    extern int video_scale;
+	int res, i, j = 0, game_index;
+	char *playbackname = NULL;
+	int use_cyclone=0;
+	int use_drz80=0;
+	int use_drz80_sound=0;
+	extern int video_scale;
 	extern int video_border;
 	extern int video_aspect;
 	extern int throttle;
@@ -152,7 +152,7 @@ int my_android_main (int argc, char **argv)
 	{
 	   return 0;
 		//gp2x_deinit();
-	  	//execl("mame.gpe", "mame.gpe", "cache", NULL);
+		//execl("mame.gpe", "mame.gpe", "cache", NULL);
 		//exit (res);
 	}
 */
@@ -177,7 +177,7 @@ int my_android_main (int argc, char **argv)
         else
         {
             for (i = 0; (drivers[i] != 0); i++) /* find game and play it */
-			{
+            {
                 if (strcmp(drivers[i]->name, inp_header.name) == 0)
                 {
                     game_index = i;
