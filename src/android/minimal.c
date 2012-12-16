@@ -184,7 +184,6 @@ int getMyValue(int key){
 	    case 2:
 	         return m4all_exitGame;
 	    case 3:
-	__android_log_print(ANDROID_LOG_DEBUG, "libMAME4all.so", "m4all_landscape_buttons  %d",m4all_landscape_buttons);
 	    	 return m4all_landscape_buttons;
 	    case 4:
 	    	 return m4all_hide_LR;

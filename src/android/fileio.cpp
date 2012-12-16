@@ -13,12 +13,11 @@
 /* Use the file cache ? */
 #define FILE_CACHE	1
 
-//#if VERBOSE
-//#define LOG(x)	logerror x
-//#else
-//#define LOG(x)	/* x */
-//#endif
+#if VERBOSE
 #define LOG(...) __android_log_print(ANDROID_LOG_DEBUG, "libMAME4all.so", __VA_ARGS__)
+#else 
+#define LOG(...)
+#endif
 
 
 extern char globalpath[247];

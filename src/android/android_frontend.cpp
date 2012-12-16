@@ -834,6 +834,29 @@ void execute_game (char *playemu, char *playgame)
 }
 
 
+extern "C" int android_main_select(const char * emul, const char * game) {
+    /* GP2X Initialization */
+    gp2x_init(1000,8,22050,16,0,60);
+
+    //hack: por defecto lentos van a 11000
+    m4all_sound = 4;
+    m4all_video_depth = 16;
+
+    if (m4all_HiSpecs) {
+        m4all_clock_cpu= 100;
+        m4all_clock_sound= 100;
+        m4all_buttons=4;
+        m4all_sound=12;
+    }
+
+    /* Initialize list of available games */
+    game_list_init();
+
+    strcpy(playemu, emul);
+    strcpy(playgame, game);
+    execute_game(playemu, playgame);
+}
+
 extern "C" int android_main  (int argc, char **argv)
 {
 	FILE *f;
